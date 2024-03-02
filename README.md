@@ -50,4 +50,6 @@ UN  172.17.0.4  70.89 KiB  256          65.8%             166fd946-03c3-4ba2-903
 ```
 
 Note the "Owns" column. This is the percentage of the data owned by the node per datacenter times the replication factor.
+"Tokens" can be thought of as "token ranges". Each of the hosts has 256 different token ranges. Cassandra does this to distribute data evenly as the cluster grows. A lower number means less-even distribution.
+
 
