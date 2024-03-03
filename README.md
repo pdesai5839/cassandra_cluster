@@ -19,7 +19,7 @@ In summary, Cassandra's architecture is designed to provide **scalability**, **h
 
 ![Architecture1](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/36cb55cb-7adf-4cfd-9b0f-38c35e6c8b1a)
 
-(Image Credit: geeksforgeeks.org)
+(Image Credit: https://geeksforgeeks.org)
 
 ## Install Cassandra
 
@@ -128,3 +128,10 @@ In Cassandra, setting a replication factor of 3 is a common practice for several
 * *Read and Write Performance*: Replicating data across multiple nodes can improve read and write performance. With multiple replicas available, Cassandra can distribute read and write requests across these replicas, reducing the load on individual nodes and improving overall system performance.
 * *Data Distribution*: Cassandra uses a decentralized architecture where data is distributed across multiple nodes in the cluster. A replication factor of 3 helps ensure that data is evenly distributed across the cluster, preventing hotspots and ensuring efficient data access.
 
+## Coordinator Node
+
+In Cassandra, you can make reads and writes to any node in the cluster. Cassandra will route this request to the correct node, meaning you don’t need to worry about what node you are connected to versus which node actually has the data. How does the coordinator figure out which node contains the data? By using consistent hashing algorithm.
+
+![mwpqwzenp3bb164vwz4m](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/620314ed-6d24-423f-a2da-90fa2d3e9941)
+
+(Image Credit: https://dev.to/
