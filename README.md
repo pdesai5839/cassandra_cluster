@@ -19,7 +19,7 @@ In summary, Cassandra's architecture is designed to provide **scalability**, **h
 
 ![Architecture1](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/36cb55cb-7adf-4cfd-9b0f-38c35e6c8b1a)
 
-(Image Credit: https://geeksforgeeks.org)
+(Image Credit: geeksforgeeks.org)
 
 ## Install Cassandra
 
@@ -130,7 +130,7 @@ In Cassandra, setting a replication factor of 3 is a common practice for several
 
 * ![mwpqwzenp3bb164vwz4m](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/620314ed-6d24-423f-a2da-90fa2d3e9941)
 
-(Image Credit: https://dev.to/)
+(Image Credit: dev.to)
 
 ## Coordinator Node / Consistent Hashing
 
@@ -144,14 +144,20 @@ Here's how consistent hashing works:
    
    ![1_ztjT3sM_O7mLDGL9l6g21w copy](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/dcedd829-3f25-46a4-a59a-d7740e5545a1)
 
+   (Image Credit: medium.com)
+
 3. **Node Mapping**: Each node is assigned a unique identifier (such as an IP address or a node ID). This identifier is hashed to generate a hash value, which is then mapped onto the hash ring.
    
    ![1_N0Wu97jOKBjDD4wRz0GnWg copy](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/d7024a6d-8501-4a08-b55e-afcd10ba4aa5)
+
+   (Image Credit: medium.com)
 
 3. **Data Partitioning**: Data keys are also hashed to generate hash values. These hash values are then mapped onto the hash ring in the same manner as the node identifiers.
    
    ![1666715227884](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/6b8b54cd-5cf0-41d2-93e0-b551ee7041eb)
 
-4. **Data Placement**: To find the node responsible for storing a particular piece of data, the system locates the node whose identifier is the next highest one on the hash ring from the hash value of the data key. This is done by traversing the hash ring in a clockwise direction until the next highest node is found.
+   (Image Credit: linkedin.com)
+
+5. **Data Placement**: To find the node responsible for storing a particular piece of data, the system locates the node whose identifier is the next highest one on the hash ring from the hash value of the data key. This is done by traversing the hash ring in a clockwise direction until the next highest node is found.
    
-5. **Consistent Hashing Property**: The key property of consistent hashing is that when a node is added or removed from the system, only a fraction of the data needs to be remapped. Specifically, when a node is added or removed, only the data that would have been assigned to or previously assigned to that node and its immediate successor on the hash ring need to be remapped. This minimizes the amount of data movement required, even when the number of nodes in the system changes.
+6. **Consistent Hashing Property**: The key property of consistent hashing is that when a node is added or removed from the system, only a fraction of the data needs to be remapped. Specifically, when a node is added or removed, only the data that would have been assigned to or previously assigned to that node and its immediate successor on the hash ring need to be remapped. This minimizes the amount of data movement required, even when the number of nodes in the system changes.
