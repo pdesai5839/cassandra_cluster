@@ -227,3 +227,6 @@ CREATE TABLE sfo_passenger_traffic.traffic_by_date (
     PRIMARY KEY ((date), terminal)
 );
 ```
+
+Note that the Primary Key consists of the Partition Key and the Clustering Key. The first group of the Primary Key specifies the Partition Key. All other parts of the Primary Key is one or more Clustering Keys.
+
