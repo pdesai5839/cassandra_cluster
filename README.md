@@ -134,7 +134,7 @@ In Cassandra, setting a replication factor of 3 is a common practice for several
 
 ## Coordinator Node / Consistent Hashing
 
-In Cassandra, you can make reads and writes to any node in the cluster. Cassandra will route this request to the correct node, meaning you don’t need to worry about what node you are connected to versus which node actually has the data. How does the coordinator figure out which node contains the data? By using consistent hashing algorithm.
+In Cassandra, you can make reads and writes to any node in the cluster. Cassandra will route this request to the correct node, meaning you don’t need to worry about what node you are connected to versus which node actually has the data. The coordinator node is responsible for determining which nodes in the cluster are responsible for the requested data (based on the partition key) and routing the request to those nodes. How does the coordinator figure out which node contains the data? By using the consistent hashing algorithm.
 
 Consistent hashing provides a way to efficiently distribute and balance data across multiple nodes in the system while minimizing the impact of node additions or removals.
 
