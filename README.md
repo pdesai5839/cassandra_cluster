@@ -215,5 +215,15 @@ Consider this made up table data for SFO passenger traffic:
 |2023-11-12|T2      |291432          |401          |
 |2023-11-12|T3      |265411          |290          |
 
-Here, we will choose `date` as the Partition Key and `terminal` as the Clustering Key.
+Here, we will choose `date` as the Partition Key and `terminal` as the Clustering Key. A combination of both `date` and `terminal` will make up the Primary Key.
 
+Now, let us proceed to create the table using the CREATE TABLE construct:
+```
+CREATE TABLE sfo_passenger_traffic.traffic_by_date (
+    date text,
+    terminal text,
+    total_passengers int,
+    total_flights int,
+    PRIMARY KEY ((date), terminal)
+);
+```
