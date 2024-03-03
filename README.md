@@ -15,15 +15,21 @@ Cassandra is a distributed NoSQL database system designed for handling large amo
 * Data Model*: Cassandra uses a column-family data model. Data is organized into keyspaces, which contain tables. Each table consists of rows and columns, where rows are identified by a primary key. Tables can have multiple columns and support sparse data, allowing each row to have a different set of columns.
 * Query Language*: Cassandra Query Language (CQL) is the primary interface for interacting with Cassandra. CQL is similar to SQL but optimized for the distributed nature of Cassandra. It supports a subset of SQL operations for creating, reading, updating, and deleting data.
 
+In summary, Cassandra's architecture is designed to provide **scalability**, **high availability**, and **fault tolerance** by distributing data across multiple nodes in a decentralized manner. Its decentralized and peer-to-peer nature, coupled with configurable replication and partitioning, makes it suitable for handling large-scale distributed data storage and processing requirements.
+
+![Architecture1](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/36cb55cb-7adf-4cfd-9b0f-38c35e6c8b1a)
+
+(Image Credit: geeksforgeeks.org)
+
 ## Install Cassandra
 
 `brew install cassandra`
 
 By default, Cassandra uses port 7000 for cluster communication (port 7001 if SSL is enabled), port 9042 for native protocol clients, and port 7199 for JMX.
 
-Let's use Docker to fire up a 3 node cluster using Cassandra 3.11. Note that this could take a while.
+Let's use Docker to fire up a 3 node cluster using Cassandra 3.11. Note that this could take a while. Save the snippet below as `start.sh` and run it from a terminal.
 
-```
+```shell
 # Run the first node
 docker run --name cassandra-1 -p 9042:9042 -d cassandra:3.11
 INSTANCE1=$(docker inspect --format="{{ .NetworkSettings.IPAddress }}" cassandra-1)
