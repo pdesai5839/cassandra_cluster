@@ -57,7 +57,7 @@ Let's verify by running the following:
 
 `docker exec cassandra-3 nodetool status`
 
-It should output something similar to this:
+The output should be similar to this:
 ```
 Datacenter: datacenter1
 =======================
@@ -230,3 +230,57 @@ CREATE TABLE sfo_passenger_traffic.traffic_by_date (
 
 Note that the Primary Key consists of the Partition Key and the Clustering Key. The first group of the Primary Key specifies the Partition Key. All other parts of the Primary Key is one or more Clustering Keys.
 
+## Insert Sample Data
+
+We'll now populate the table with the sample data using cqlsh:
+
+```sql
+BEGIN BATCH 
+
+INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
+VALUES ('2023-11-10','T1',303866,368) IF NOT EXISTS; 
+
+INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
+VALUES ('2023-11-10','T2',321195,425) IF NOT EXISTS; 
+
+INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
+VALUES ('2023-11-10','T3',254921,375) IF NOT EXISTS; 
+
+INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
+VALUES ('2023-11-11','T1',300723,350) IF NOT EXISTS;
+
+INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
+VALUES ('2023-11-11','T2',322274,439) IF NOT EXISTS; 
+
+INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
+VALUES ('2023-11-11','T3',286743,312) IF NOT EXISTS; 
+
+INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
+VALUES ('2023-11-12','T1',361829,381) IF NOT EXISTS;
+
+INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
+VALUES ('2023-11-12','T2',291432,401) IF NOT EXISTS; 
+
+INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
+VALUES ('2023-11-12','T3',265411,290) IF NOT EXISTS; 
+
+APPLY BATCH;
+```
+
+Let's verify that our data is populated in the table:
+
+```shell
+cqlsh> select * from sfo_passenger_traffic.traffic_by_date;
+
+ date       | terminal | total_flights | total_passengers
+------------+----------+---------------+------------------
+ 2023-11-11 |       T1 |           350 |           300723
+ 2023-11-11 |       T2 |           439 |           322274
+ 2023-11-11 |       T3 |           312 |           286743
+ 2023-11-12 |       T1 |           381 |           361829
+ 2023-11-12 |       T2 |           401 |           291432
+ 2023-11-12 |       T3 |           290 |           265411
+ 2023-11-10 |       T1 |           368 |           303866
+ 2023-11-10 |       T2 |           425 |           321195
+ 2023-11-10 |       T3 |           375 |           254921
+```
