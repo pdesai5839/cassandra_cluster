@@ -191,4 +191,29 @@ Data partitioning is a key aspect of Cassandra's architecture. It allowsdistribu
 5. **Replication**:
    * To ensure fault tolerance and high availability, Cassandra replicates data across multiple nodes in the cluster. Each piece of data is replicated to a configurable number of replica nodes (determined by the replication factor) using a replication strategy specified at the keyspace level.
    * By using partitioning and replication, Cassandra can distribute and replicate data across multiple nodes in the cluster, providing scalability, fault tolerance, and high availability for large-scale distributed data storage and processing applications.
-  
+
+## Partition Key/Primary Key
+
+In Cassandra, tables are defined with columns and corresponding data types. Each table must have a primary key, which uniquely identifies rows based on one or multiple columns.
+
+However, unlike traditional databases such as MySQL, defining a primary key in Cassandra involves two main components:
+
+1. A mandatory partition key: This key is required and serves as the primary identifier for data partitioning.
+2. An optional set of clustering columns: These columns, if specified, help define the sorting order within each partition.
+
+Consider this made up table data for SFO passenger traffic:
+
+|date      |terminal|total_passengers|total_flights|
+|----------|--------|----------------|-------------|
+|2023-11-10|T1      |303866          |367          |
+|2023-11-10|T2      |321195          |425          |
+|2023-11-10|T3      |254921          |375          |
+|2023-11-11|T1      |300723          |350          |
+|2023-11-11|T2      |322274          |439          |
+|2023-11-11|T3      |286743          |312          |
+|2023-11-12|T1      |361829          |381          |
+|2023-11-12|T2      |291432          |401          |
+|2023-11-12|T3      |265411          |290          |
+
+Here, we will choose `date` as the Partition Key and `terminal` as the Clustering Key.
+
