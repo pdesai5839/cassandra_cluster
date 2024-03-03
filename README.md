@@ -140,24 +140,55 @@ Consistent hashing provides a way to efficiently distribute and balance data acr
 
 Here's how consistent hashing works:
 
-1. **Hash Ring**: Imagine a hash ring, which is a circular ring consisting of a large number of hash values arranged in a circular manner.
+1. **Hash Ring**:
+   * Imagine a hash ring, which is a circular ring consisting of a large number of hash values arranged in a circular manner.
    
    ![1_ztjT3sM_O7mLDGL9l6g21w copy](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/dcedd829-3f25-46a4-a59a-d7740e5545a1)
 
    (Image Credit: medium.com)
 
-3. **Node Mapping**: Each node is assigned a unique identifier (such as an IP address or a node ID). This identifier is hashed to generate a hash value, which is then mapped onto the hash ring.
+2. **Node Mapping**:
+   * Each node is assigned a unique identifier (such as an IP address or a node ID). This identifier is hashed to generate a hash value, which is then mapped onto the hash ring.
    
    ![1_N0Wu97jOKBjDD4wRz0GnWg copy](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/d7024a6d-8501-4a08-b55e-afcd10ba4aa5)
 
    (Image Credit: medium.com)
 
-3. **Data Partitioning**: Data keys are also hashed to generate hash values. These hash values are then mapped onto the hash ring in the same manner as the node identifiers.
+3. **Data Partitioning**:
+   * Data keys are also hashed to generate hash values. These hash values are then mapped onto the hash ring in the same manner as the node identifiers.
    
    ![1666715227884](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/6b8b54cd-5cf0-41d2-93e0-b551ee7041eb)
 
    (Image Credit: linkedin.com)
 
-5. **Data Placement**: To find the node responsible for storing a particular piece of data, the system locates the node whose identifier is the next highest one on the hash ring from the hash value of the data key. This is done by traversing the hash ring in a clockwise direction until the next highest node is found.
+4. **Data Placement**:
+   * To find the node responsible for storing a particular piece of data, the system locates the node whose identifier is the next highest one on the hash ring from the hash value of the data key. This is done by traversing the hash ring in a clockwise direction until the next highest node is found.
    
-6. **Consistent Hashing Property**: The key property of consistent hashing is that when a node is added or removed from the system, only a fraction of the data needs to be remapped. Specifically, when a node is added or removed, only the data that would have been assigned to or previously assigned to that node and its immediate successor on the hash ring need to be remapped. This minimizes the amount of data movement required, even when the number of nodes in the system changes.
+5. **Consistent Hashing Property**:
+   * The key property of consistent hashing is that when a node is added or removed from the system, only a fraction of the data needs to be remapped. Specifically, when a node is added or removed, only the data that would have been assigned to or previously assigned to that node and its immediate successor on the hash ring need to be remapped. This minimizes the amount of data movement required, even when the number of nodes in the system changes.
+
+## Data Partitioning
+
+Data partitioning is a key aspect of Cassandra's architecture. It allowsdistribution of data across multiple nodes in a cluster for scalability and fault tolerance. Here's how data partitioning works in Cassandra:
+
+1. **Partition Key**:
+   * Each row in a Cassandra table is uniquely identified by a primary key, which consists of one or more columns. The first column in the primary key is known as the partition key.
+   * The partition key is used to determine which node in the cluster will store the data for that row.
+
+2. **Token-Based Partitioning**:
+   * Cassandra uses a token-based partitioning scheme to distribute data across nodes in the cluster. It generates a token (a 128-bit integer) for each partition key value using a hash function (usually Murmur3).
+   * The token value determines the placement of data on the hash ring, which is a logical representation of the nodes in the cluster.
+
+3. **Partitioner**:
+   * Cassandra uses a partitioner to map partition key values to tokens and determine which nodes are responsible for storing the data.
+   * The partitioner ensures that each token is assigned to a specific node in the cluster based on the token's position on the hash ring.
+
+4. **Data Distribution**:
+   * When data is written to Cassandra, the partitioner hashes the partition key value to generate a token. Cassandra then uses the token to determine which node in the cluster will store the data.
+   * Each node is responsible for storing data for a range of tokens, and each token corresponds to a range of partition key values.
+   * Cassandra ensures that data is evenly distributed across nodes in the cluster to prevent hotspots and ensure efficient data access.
+
+5. **Replication**:
+   * To ensure fault tolerance and high availability, Cassandra replicates data across multiple nodes in the cluster. Each piece of data is replicated to a configurable number of replica nodes (determined by the replication factor) using a replication strategy specified at the keyspace level.
+   * By using partitioning and replication, Cassandra can distribute and replicate data across multiple nodes in the cluster, providing scalability, fault tolerance, and high availability for large-scale distributed data storage and processing applications.
+  
