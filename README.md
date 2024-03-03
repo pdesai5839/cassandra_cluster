@@ -218,7 +218,7 @@ Consider this made up table data for SFO passenger traffic:
 Here, we will choose `date` as the Partition Key and `terminal` as the Clustering Key. A combination of both `date` and `terminal` will make up the Primary Key.
 
 Now, let us proceed to create the table using the CREATE TABLE construct:
-```
+```sql
 CREATE TABLE sfo_passenger_traffic.traffic_by_date (
     date text,
     terminal text,
