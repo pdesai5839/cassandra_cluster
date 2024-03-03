@@ -128,6 +128,5 @@ In Cassandra, setting a replication factor of 3 is a common practice for several
 * *Read and Write Performance*: Replicating data across multiple nodes can improve read and write performance. With multiple replicas available, Cassandra can distribute read and write requests across these replicas, reducing the load on individual nodes and improving overall system performance.
 * *Data Distribution*: Cassandra uses a decentralized architecture where data is distributed across multiple nodes in the cluster. A replication factor of 3 helps ensure that data is evenly distributed across the cluster, preventing hotspots and ensuring efficient data access.
 
-![figure3](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/3691a7fc-2141-4e0c-933a-e9ed7b773ab5)
 
 (Image Credit: geeksforgeeks.org)
