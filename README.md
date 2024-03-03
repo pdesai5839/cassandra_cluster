@@ -4,6 +4,17 @@ This project will demo several key concepts in Cassandra NoSQL database such as 
 
 Good news is that everything can be done locally on your Mac.
 
+## Cassandra Architecture
+Cassandra is a distributed NoSQL database system designed for handling large amounts of data across multiple nodes while providing high availability and fault tolerance. Here's an overview of its architecture:
+* *Decentralized Architecture*: Cassandra follows a decentralized architecture where there is no single point of failure. Each node in the Cassandra cluster is identical and self-sufficient, with no leader-follower relationship.
+* *Peer-to-Peer Communication*: Nodes communicate with each other using a peer-to-peer protocol. Each node can accept read and write requests, making the system highly scalable.
+* *Replication*: Cassandra replicates data across multiple nodes to ensure high availability and fault tolerance. Replication is configurable at the keyspace level, allowing users to define the replication factor and replication strategy.
+* *Data Distribution*: Cassandra distributes data across nodes using a partitioning scheme based on consistent hashing. Each piece of data is assigned a partition key, and Cassandra uses the partition key to determine which node should store the data. This ensures even distribution of data across the cluster.
+* *CAP Theorem*: Cassandra is designed to provide high availability and partition tolerance (AP) while sacrificing strong consistency (CP) in certain scenarios. It offers tunable consistency levels, allowing users to choose the level of consistency required for their applications.
+* Gossip Protocol*: Cassandra uses a gossip protocol for node discovery, failure detection, and membership management. Nodes periodically exchange information about the cluster's state, allowing them to detect and react to changes dynamically.
+* Data Model*: Cassandra uses a column-family data model. Data is organized into keyspaces, which contain tables. Each table consists of rows and columns, where rows are identified by a primary key. Tables can have multiple columns and support sparse data, allowing each row to have a different set of columns.
+* Query Language*: Cassandra Query Language (CQL) is the primary interface for interacting with Cassandra. CQL is similar to SQL but optimized for the distributed nature of Cassandra. It supports a subset of SQL operations for creating, reading, updating, and deleting data.
+
 ## Install Cassandra
 
 `brew install cassandra`
