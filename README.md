@@ -294,4 +294,7 @@ Here's an illustrated version:
 Couple things to note in the image above:
 1. Rows in each partition are ordered by the Clustering Key.
 2. Combination of Partition Key & Clustering Key uniquely identifies each row.
+3. Partition Key is used to create and populate the partitions.
+4. Data is read from and written to different nodes based on the Partiton Key.
 
+ 
