@@ -284,3 +284,14 @@ cqlsh> select * from sfo_passenger_traffic.traffic_by_date;
  2023-11-10 |       T2 |           425 |           321195
  2023-11-10 |       T3 |           375 |           254921
 ```
+
+## Partitioning
+Our `traffic_by_date` table uses `date` as the Partition Key. What does this mean? It means that all rows matching a date will be placed in the same partition.
+
+Here's an illustrated version:
+![9f2aabf3-d4be-4e1d-be6d-410c1f1345b2](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/d1211f0c-8aa8-4124-8e7d-3e8a16bc79c6)
+
+Couple things to note in the image above:
+1. Rows in each partition are ordered by the Clustering Key.
+2. Combination of Partition Key & Clustering Key uniquely identifies each row.
+
