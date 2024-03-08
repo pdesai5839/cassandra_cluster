@@ -291,7 +291,7 @@ Our `traffic_by_date` table uses `date` as the Partition Key. What does this mea
 Here's an illustrated version:
 ![cassandra partition](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/45d2c585-247d-467c-9ae5-6b141558ca3c)
 
-Couple things to note in the image above:
+Couple of things to note in the image above:
 1. Rows in each partition are ordered by the Clustering Key.
 2. Combination of Partition Key & Clustering Key uniquely identifies each row.
 3. Partition Key is used to create and populate the partitions.
