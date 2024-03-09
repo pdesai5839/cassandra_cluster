@@ -297,4 +297,6 @@ Couple of things to note in the image above:
 3. Partition Key is used to create and populate the partitions.
 4. Data is read from and written to different nodes based on the Partiton Key.
 
- 
+It may be apparent by now that it is super important to understand the distribution of data.
+We must carefully consider how the data is read and writitten among the partitions.
+
