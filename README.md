@@ -499,3 +499,48 @@ Cassandra allows you to set various merge and compaction strategies for a table.
 It is important to consider the compaction startegy at the outset when creating the tables. Although you can alter the compaction strategy of an existing table, it will lead to significant performance issues in a production system.
 
 ## Data Presorting
+In Cassandra, data is already sorted on disk, eliminating the need for sorting it later. By implementing sorting at the table level, the necessity of sorting data within client applications querying Cassandra can be avoided.
+
+Let's add `timezone` as another clustering column in our sample table and populate it with the same data:
+
+```sql
+CREATE TABLE geo_data.regions_by_country_sort_by_tz_asc (
+    country text,
+    region text,
+    region_name text,
+    region_code int,
+    timezone text,
+    PRIMARY KEY ((country), timezone, region_name)
+);
+```
+```sql
+BEGIN BATCH 
+
+INSERT INTO geo_data.regions_by_country_sort_by_tz_asc (country, region, region_name, region_code, timezone)
+  VALUES('fra','bre','bretagne',34974,'Europe/Paris');
+
+INSERT INTO geo_data.regions_by_country_sort_by_tz_asc (country, region, region_name, region_code, timezone)
+  VALUES('fra','nor','normandie',34980,'Europe/Paris');
+
+INSERT INTO geo_data.regions_by_country_sort_by_tz_asc (country, region, region_name, region_code, timezone)
+  VALUES('usa','ca','california',5,'America/Los_Angeles');
+
+INSERT INTO geo_data.regions_by_country_sort_by_tz_asc (country, region, region_name, region_code, timezone)
+  VALUES('usa','nv','nevada',29,'America/Los_Angeles');
+
+INSERT INTO geo_data.regions_by_country_sort_by_tz_asc (country, region, region_name, region_code, timezone)
+  VALUES('usa','va','virginia',47,'America/New_York');
+
+APPLY BATCH;
+```
+
+```sql
+SELECT * FROM geo_data.regions_by_country_sort_by_tz_asc where country = 'usa';
+```
+```shell
+ country | timezone            | region_name | region | region_code
+---------+---------------------+-------------+--------+-------------
+     usa | America/Los_Angeles |  california |     ca |           5
+     usa | America/Los_Angeles |      nevada |     nv |          29
+     usa |    America/New_York |    virginia |     va |          47
+```
