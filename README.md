@@ -203,13 +203,13 @@ However, unlike traditional databases such as MySQL, defining a primary key in C
 
 Consider this table containing region data:
 
-| country | region | region_name | timezone            |
-|---------|--------|-------------|---------------------|
-| usa     | ca     | california  | America/Los_Angeles |
-| usa     | nv     | nevada      | America/Los_Angeles |
-| usa     | va     | virginia    | America/New_York    |
-| fra     | bre    | bretagne    | Europe/Paris        |
-| fra     | nor    | normandie   | Europe/Paris        |
+| country | region | region_name | region_code | timezone            |
+|---------|--------|-------------|-------------|---------------------|
+| usa     | ca     | california  | 5           | America/Los_Angeles |
+| usa     | nv     | nevada      | 29          | America/Los_Angeles |
+| usa     | va     | virginia    | 47          | America/New_York    |
+| fra     | bre    | bretagne    | 34974       | Europe/Paris        |
+| fra     | nor    | normandie   | 34980       | Europe/Paris        |
 
 Here, we will choose `country` as the Partition Key and `region_name` as the Clustering Key. A combination of both `country` and `region_name` will make up the Primary Key.
 
@@ -219,6 +219,7 @@ CREATE TABLE geo_data.regions_by_country (
     country text,
     region text,
     region_name text,
+    region_code int,
     timezone text,
     PRIMARY KEY ((country), region_name)
 );
@@ -226,27 +227,25 @@ CREATE TABLE geo_data.regions_by_country (
 
 Note that the Primary Key consists of the Partition Key and the Clustering Key. The first group of the Primary Key specifies the Partition Key. All other parts of the Primary Key is one or more Clustering Keys. The Primary Key defines what columns are used to identify rows. Add all columns that are required to identify a row uniquely to the primary key. In our sample data, using just the `country` column would not uniquely identify each row, which is why we added `region_name` column to the Primary Key.
 
-## Insert Sample Data
-
 We'll now populate the table with the sample data using cqlsh:
 
 ```sql
 BEGIN BATCH 
 
-INSERT INTO geo_data.regions_by_country (country, region, region_name, timezone)
-  VALUES('usa','ca','california','America/Los_Angeles');
+INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
+  VALUES('usa','ca','california',5,'America/Los_Angeles');
 
-INSERT INTO geo_data.regions_by_country (country, region, region_name, timezone)
-  VALUES('usa','nv','nevada','America/Los_Angeles');
+INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
+  VALUES('usa','nv','nevada',29,'America/Los_Angeles');
 
-INSERT INTO geo_data.regions_by_country (country, region, region_name, timezone)
-  VALUES('usa','va','virginia','America/New_York');
+INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
+  VALUES('usa','va','virginia',47,'America/New_York');
 
-INSERT INTO geo_data.regions_by_country (country, region, region_name, timezone)
-  VALUES('fra','bre','bretagne','Europe/Paris');
+INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
+  VALUES('fra','bre','bretagne',34974,'Europe/Paris');
 
-INSERT INTO geo_data.regions_by_country (country, region, region_name, timezone)
-  VALUES('fra','nor','normandie','Europe/Paris');
+INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
+  VALUES('fra','nor','normandie',34980,'Europe/Paris');
 
 APPLY BATCH;
 ```
@@ -257,17 +256,19 @@ Let's verify that our data is populated in the table:
 SELECT * FROM geo_data.regions_by_country;
 ```
 ```shell
- country | region_name | region | timezone
----------+-------------+--------+---------------------
-     fra |    bretagne |    bre |        Europe/Paris
-     fra |   normandie |    nor |        Europe/Paris
-     usa |  california |     ca | America/Los_Angeles
-     usa |      nevada |     nv | America/Los_Angeles
-     usa |    virginia |     va |    America/New_York
+ country | region_name | region | region_code | timezone
+---------+-------------+--------+-------------+---------------------
+     fra |    bretagne |    bre |       34974 |        Europe/Paris
+     fra |   normandie |    nor |       34980 |        Europe/Paris
+     usa |  california |     ca |           5 | America/Los_Angeles
+     usa |      nevada |     nv |          29 | America/Los_Angeles
+     usa |    virginia |     va |          47 |    America/New_York
+
+(5 rows)
 ```
 
 ## Efficient Partitioning
-Our `regions_by_country` table uses `country` as the Partition Key. What does this mean? It means that all rows matching a country value will be placed in the same partition.
+The `regions_by_country` table uses `country` as the Partition Key. What does this mean? It means that all rows matching a country value will be placed in the same partition.
 
 Here's an illustrated version:
 ![cassandra partition (1)](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/efeb261f-ec8a-4235-8067-f6b2a682c3a8)
@@ -307,4 +308,16 @@ A consistency level of one indicates that a read or write operation must be ackn
 While a consistency level of one offers low latency and high availability for read and write operations, it sacrifices consistency guarantees. In scenarios where consistency is not critical or where low latency is prioritized over consistency, using a consistency level of one may be appropriate. However, it's essential to consider the trade-offs and potential implications on data consistency when choosing the consistency level for operations in Cassandra.
 
 ## Inefficient Partitioning
+
+Let's create another table to illustrate choosing a Partition Key that will require Cassandra to gather data from multiple partitions. This query will not perform well.
+
+```sql
+CREATE TABLE geo_data.regions_by_timezone (
+    country text,
+    region text,
+    region_name text,
+    timezone text,
+    PRIMARY KEY (timezone)
+);
+```
 
