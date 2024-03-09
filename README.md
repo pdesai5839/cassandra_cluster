@@ -346,14 +346,13 @@ APPLY BATCH;
 Assume Cassandra assigns the above rows as shown here:
 ![cassandra partition 2](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/3dc3b2cc-3515-4d1d-a81a-4633edb77c9c)
 
-
-This new table that uses `region_code` as the Partition Key. If the use case requires us to get region data by its code, then the following query will work efficiently:
+This new table uses `region_code` as the Partition Key. If the use case requires us to get region data by its code, then the following query will work efficiently because Cassandra only needs to read from 1 partition for the data:
 
 ```sql
 SELECT * FROM geo_data.regions_by_code WHERE region_code = 5;
 ```
 
-However, if the application needs all regions based on the timezone:
+However, if the application needs all regions based on the timezone, then data would need to come from multiple partitons. Since these partitions are spead out over multile nodes, talking to these nodes will be expensive and can cause performance issues on a large cluster.
 
 ```sql
 SELECT * FROM geo_data.regions_by_code WHERE timezone = 'America/Los_Angeles';
