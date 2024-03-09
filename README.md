@@ -385,6 +385,8 @@ The answer has been discusssed already :).
 
 ## Replication
 
-Partitioning is certainly useful but it will not be enough to achieve high scalability. Let's discuss why.
+Partitioning is certainly useful but it will not be enough to achieve high scalability. Let's examine why this is the case.
 
 1. Single partition key space: Each partition key maps to a specific node in the cluster, and all data with the same partition key resides on that node. As the amount of data grows, the capacity of individual nodes can become a bottleneck. Eventually, the storage capacity, memory, or compute resources of a single node may be insufficient to handle the increasing volume of data or workload.
+2. Hot spots: In some cases, certain partition keys may become "hot spots," meaning they are accessed more frequently than others. Hot spots can occur due to uneven data distribution or skewed access patterns, leading to uneven load distribution across nodes. Hot spots can impact performance and scalability by overloading specific nodes while underutilizing others.
+3. 
