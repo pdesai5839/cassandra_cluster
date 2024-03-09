@@ -266,7 +266,7 @@ SELECT * FROM geo_data.regions_by_country;
      usa |    virginia |     va |    America/New_York
 ```
 
-## Partitioning
+## Efficient Partitioning
 Our `regions_by_country` table uses `country` as the Partition Key. What does this mean? It means that all rows matching a country value will be placed in the same partition.
 
 Here's an illustrated version:
@@ -305,3 +305,6 @@ This query would have been sent to a single node by default. This is known as co
 A consistency level of one indicates that a read or write operation must be acknowledged by only one replica node. When a client performs a read or write operation with a consistency level of one, Cassandra sends the request to one replica node responsible for the data partition and waits for an acknowledgment from that node. Once the acknowledgment is received, the operation is considered successful, even if the data has not been replicated to other nodes in the cluster.
 
 While a consistency level of one offers low latency and high availability for read and write operations, it sacrifices consistency guarantees. In scenarios where consistency is not critical or where low latency is prioritized over consistency, using a consistency level of one may be appropriate. However, it's essential to consider the trade-offs and potential implications on data consistency when choosing the consistency level for operations in Cassandra.
+
+## Inefficient Partitioning
+
