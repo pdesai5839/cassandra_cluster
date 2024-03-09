@@ -438,9 +438,25 @@ According to the CAP theorem, the cluster can not be available and consistent at
 
 Let's recall: Consistency level means how many nodes need to acknowledge a read or a write query for that operation to be considered successful.
 
-To achieve strong consistency, the number of replica nodes that respond to a read or write operation must be equal to or greater than the replication factor.
+To achieve strong consistency, the number of replica nodes that respond to a read or write operation must be greater than the replication factor.
 
 ```
 R + W > N
 where R = Read Consistency, W = Write Consistency, N = Replication Factor
 ```
+
+### Read Heavy System
+For a read-heavy system, it's a good idea to keep read consistency low because reads vastly outnumber writes. 
+Assuming a replication factor of 3, the formula would look like this:
+```
+1 + W > 3
+```
+Therefore, the write consistency must be 3 to achieve strong consistentcy in a read-heavy system.
+
+### Write Heavy System
+For a write-heavy system, it's a good idea to keep write consistency low because writes vastly outnumber reads. 
+Assuming a replication factor of 3, the formula would look like this:
+```
+R + 1 > 3
+```
+Therefore, the read consistency must be 3 to achieve strong consistentcy in a write-heavy system.
