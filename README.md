@@ -416,9 +416,31 @@ A consistency level of ONE is the default or both read and write operations. For
 
 Let's look at some of the more important consistency levels.
 
+### Tunable Consistency
+The levels of consistency and availability are adjustable to meet certain requirements. Individual read and write operations define the number of replicas that must acknowledge a request in order for that request to succeed.
+
+| Consistency Level | Description                                                                                                                                                                                                                                                   |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ONE, TWO, THREE   | The number of replicas that must respond to a read or write operation.                                                                                                                                                                                        |
+| LOCAL_ONE         | One replica in the same data center as the coordinator must successfully respond to  the read or write request. Provides low latency at the expense of consistency.                                                                                           |
+| LOCAL_QUORUM      | A quorum (majority) of the replica nodes in the same data center as the coordinator must  respond to the read or write request. Avoids latency of inter-data-center communication.                                                                            |
+| QUORUM            | A quorum (majority) of the replicas in the cluster need to respond to a read or write  request for it to succeed. Used to maintain strong consistency across the entire cluster.                                                                              |
+| EACH_QUORUM       | The read or write must succeed on a quorum of replica nodes in each data center.  Used only for writes to a multi-data-center cluster to maintain the same level of consistency across data centers.                                                          |
+| ALL               | The request must succeed on all replicas. Provides the highest consistency and the lowest availability of any other level.                                                                                                                                    |
+| ANY               | A write must succeed on at least one node or, if all replicas are down, a hinted handoff has been written. Guarantees that a write will never fail at the expense of having the lowest consistency. Delivers the lowest consistency and highest availability. |
+
 ### Strong Consistency
 In a strong consistency model, when a read operation returns a value, it guarantees that the value is the latest one that was successfully written to at least one replica node in the cluster.
 
 According to the CAP theorem, the cluster can not be available and consistent at the same time when nodes can not communicate with each other. A strong consistency model implies that data consistency is favored when this happens even if it means that some nodes are marked as unavailable. When a Cassandra node becomes unavailable, processing continues and failed writes are temporarily saved as hints on the coordinator node. If the hints have not expired, they are applied to the node when it becomes available.
 
+### Tune for Strong Consistency
 
+Let's recall: Consistency level means how many nodes need to acknowledge a read or a write query for that operation to be considered successful.
+
+To achieve strong consistency, the number of replica nodes that respond to a read or write operation must be equal to or greater than the replication factor.
+
+```
+R + W > N
+where R = Read Consistency, W = Write Consistency, N = Replication Factor
+```
