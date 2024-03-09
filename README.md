@@ -85,7 +85,7 @@ Connect to the first node by starting cqlsh shell in Docker:
 
 When connected, you'll see this:
 
-```
+```shell
 Connected to Test Cluster at 127.0.0.1:9042.
 [cqlsh 5.0.1 | Cassandra 3.11.16 | CQL spec 3.4.4 | Native protocol v4]
 Use HELP for help.
@@ -95,8 +95,8 @@ cqlsh>
 ## Keyspaces
 
 Time to execute our first query. Run the `DESCRIBE` command:
-```
-cqlsh> DESCRIBE keyspaces;
+```sql
+DESCRIBE keyspaces;
 
 system_traces  system_schema  system_auth  system  system_distributed
 ```
@@ -106,17 +106,17 @@ The `DESCRIBE keyspaces;` command is used to display information about the keysp
 So what are keyspaces anyway? Let's define it in simple terms:
 Keyspaces are the highest-level containers for organizing data. Think of the more familiar Schema/Database in traditional SQL RDMS and you'll get a feel for what Keyspaces are. Keyspaces are top-level containers for organizing data. However, this is where the similarity ends.
 
-So knowing what keyspaces are, we must create the keyspaces first in order to create tables. We'll use passenger arrivals/departues traffic for San Francisco International Airport to play around with Cassandra.
+So knowing what keyspaces are, we must create the keyspaces first in order to create tables. We'll create a simple table with some geo data to play around with Cassandra.  
 
-```
-CREATE KEYSPACE sfo_passenger_traffic 
+```sql
+CREATE KEYSPACE geo_data 
   WITH REPLICATION = { 
    'class' : 'NetworkTopologyStrategy',
    'datacenter1' : 3 
   };
 ```
 
-What did we just do? We just created a keyspace named "sfo_passenger_traffic" with these replication settings:
+What did we just do? We just created a keyspace named `geo_data` with these replication settings:
 * The replication strategy specified is "NetworkTopologyStrategy". This strategy is used to replicate data across multiple data centers in a Cassandra cluster.
 * Within the "NetworkTopologyStrategy", the replication factor for the "datacenter1" is set to 3. This means that the data in this keyspace will be replicated across three nodes within the "datacenter1" data center.
 
@@ -201,34 +201,30 @@ However, unlike traditional databases such as MySQL, defining a primary key in C
 1. A mandatory partition key: This key is required and serves as the primary identifier for data partitioning.
 2. An optional set of clustering columns: These columns, if specified, help define the sorting order within each partition.
 
-Consider this made up table data for SFO passenger traffic:
+Consider this table containing region data:
 
-|date      |terminal|total_passengers|total_flights|
-|----------|--------|----------------|-------------|
-|2023-11-10|T1      |303866          |367          |
-|2023-11-10|T2      |321195          |425          |
-|2023-11-10|T3      |254921          |375          |
-|2023-11-11|T1      |300723          |350          |
-|2023-11-11|T2      |322274          |439          |
-|2023-11-11|T3      |286743          |312          |
-|2023-11-12|T1      |361829          |381          |
-|2023-11-12|T2      |291432          |401          |
-|2023-11-12|T3      |265411          |290          |
+| country | region | region_name | timezone            |
+|---------|--------|-------------|---------------------|
+| usa     | ca     | california  | America/Los_Angeles |
+| usa     | nv     | nevada      | America/Los_Angeles |
+| usa     | va     | virginia    | America/New_York    |
+| fra     | bre    | bretagne    | Europe/Paris        |
+| fra     | nor    | normandie   | Europe/Paris        |
 
-Here, we will choose `date` as the Partition Key and `terminal` as the Clustering Key. A combination of both `date` and `terminal` will make up the Primary Key.
+Here, we will choose `country` as the Partition Key and `region_name` as the Clustering Key. A combination of both `country` and `region_name` will make up the Primary Key.
 
 Now, let us proceed to create the table using the CREATE TABLE construct:
 ```sql
-CREATE TABLE sfo_passenger_traffic.traffic_by_date (
-    date text,
-    terminal text,
-    total_passengers int,
-    total_flights int,
-    PRIMARY KEY ((date), terminal)
+CREATE TABLE geo_data.regions_by_country (
+    country text,
+    region text,
+    region_name text,
+    timezone text,
+    PRIMARY KEY ((country), region_name)
 );
 ```
 
-Note that the Primary Key consists of the Partition Key and the Clustering Key. The first group of the Primary Key specifies the Partition Key. All other parts of the Primary Key is one or more Clustering Keys. The Primary Key defines what columns are used to identify rows. Add all columns that are required to identify a row uniquely to the primary key. In our sample data, using just the `date` column would not uniquely identify each row, which is why we added `terminal` column to the Primary Key.
+Note that the Primary Key consists of the Partition Key and the Clustering Key. The first group of the Primary Key specifies the Partition Key. All other parts of the Primary Key is one or more Clustering Keys. The Primary Key defines what columns are used to identify rows. Add all columns that are required to identify a row uniquely to the primary key. In our sample data, using just the `country` column would not uniquely identify each row, which is why we added `region_name` column to the Primary Key.
 
 ## Insert Sample Data
 
@@ -237,61 +233,46 @@ We'll now populate the table with the sample data using cqlsh:
 ```sql
 BEGIN BATCH 
 
-INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
-VALUES ('2023-11-10','T1',303866,368) IF NOT EXISTS; 
+INSERT INTO geo_data.regions_by_country (country, region, region_name, timezone)
+  VALUES('usa','ca','california','America/Los_Angeles');
 
-INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
-VALUES ('2023-11-10','T2',321195,425) IF NOT EXISTS; 
+INSERT INTO geo_data.regions_by_country (country, region, region_name, timezone)
+  VALUES('usa','nv','nevada','America/Los_Angeles');
 
-INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
-VALUES ('2023-11-10','T3',254921,375) IF NOT EXISTS; 
+INSERT INTO geo_data.regions_by_country (country, region, region_name, timezone)
+  VALUES('usa','va','virginia','America/New_York');
 
-INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
-VALUES ('2023-11-11','T1',300723,350) IF NOT EXISTS;
+INSERT INTO geo_data.regions_by_country (country, region, region_name, timezone)
+  VALUES('fra','bre','bretagne','Europe/Paris');
 
-INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
-VALUES ('2023-11-11','T2',322274,439) IF NOT EXISTS; 
-
-INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
-VALUES ('2023-11-11','T3',286743,312) IF NOT EXISTS; 
-
-INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
-VALUES ('2023-11-12','T1',361829,381) IF NOT EXISTS;
-
-INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
-VALUES ('2023-11-12','T2',291432,401) IF NOT EXISTS; 
-
-INSERT INTO sfo_passenger_traffic.traffic_by_date (date,terminal,total_passengers,total_flights) 
-VALUES ('2023-11-12','T3',265411,290) IF NOT EXISTS; 
+INSERT INTO geo_data.regions_by_country (country, region, region_name, timezone)
+  VALUES('fra','nor','normandie','Europe/Paris');
 
 APPLY BATCH;
 ```
 
 Let's verify that our data is populated in the table:
 
+```sql
+SELECT * FROM geo_data.regions_by_country;
+```
 ```shell
-cqlsh> select * from sfo_passenger_traffic.traffic_by_date;
-
- date       | terminal | total_flights | total_passengers
-------------+----------+---------------+------------------
- 2023-11-11 |       T1 |           350 |           300723
- 2023-11-11 |       T2 |           439 |           322274
- 2023-11-11 |       T3 |           312 |           286743
- 2023-11-12 |       T1 |           381 |           361829
- 2023-11-12 |       T2 |           401 |           291432
- 2023-11-12 |       T3 |           290 |           265411
- 2023-11-10 |       T1 |           368 |           303866
- 2023-11-10 |       T2 |           425 |           321195
- 2023-11-10 |       T3 |           375 |           254921
+ country | region_name | region | timezone
+---------+-------------+--------+---------------------
+     fra |    bretagne |    bre |        Europe/Paris
+     fra |   normandie |    nor |        Europe/Paris
+     usa |  california |     ca | America/Los_Angeles
+     usa |      nevada |     nv | America/Los_Angeles
+     usa |    virginia |     va |    America/New_York
 ```
 
 ## Partitioning
-Our `traffic_by_date` table uses `date` as the Partition Key. What does this mean? It means that all rows matching a date will be placed in the same partition.
+Our `regions_by_country` table uses `country` as the Partition Key. What does this mean? It means that all rows matching a country value will be placed in the same partition.
 
 Here's an illustrated version:
-![cassandra partition](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/45d2c585-247d-467c-9ae5-6b141558ca3c)
+![cassandra partition (1)](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/efeb261f-ec8a-4235-8067-f6b2a682c3a8)
 
-Couple of things to note in the image above:
+Let's note a few things:
 1. Rows in each partition are ordered by the Clustering Key.
 2. Combination of Partition Key & Clustering Key uniquely identifies each row.
 3. Partition Key is used to create and populate the partitions.
@@ -302,16 +283,17 @@ We must carefully consider how the data is read and writitten among the partitio
 
 The Partition Key helps distribute data evenly between nodes, it is also needed when reading the data.
 
-Our schema for SFO data is designed to be queried by the Partition Key which is `date`.
+Our schema for regions is designed to be queried by the Partition Key which is `country`.
 
+```sql
+SELECT * FROM geo_data.regions_by_country WHERE country = 'usa';
+```
 ```shell
-cqlsh> SELECT * FROM sfo_passenger_traffic.traffic_by_date WHERE date = '2023-11-10';
-
- date       | terminal | total_flights | total_passengers
-------------+----------+---------------+------------------
- 2023-11-10 |       T1 |           368 |           303866
- 2023-11-10 |       T2 |           425 |           321195
- 2023-11-10 |       T3 |           375 |           254921
+ country | region_name | region | timezone
+---------+-------------+--------+---------------------
+     usa |  california |     ca | America/Los_Angeles
+     usa |      nevada |     nv | America/Los_Angeles
+     usa |    virginia |     va |    America/New_York
 
 (3 rows)
 ```
