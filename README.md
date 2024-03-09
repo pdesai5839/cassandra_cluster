@@ -364,6 +364,7 @@ InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot exe
 ```
 
 Since we want to filter by a column that is not a Partition Key (i.e. `timezone`), we have to tell Cassandra to filter by a non-partition key column using `ALLOW FILTERING`.
+
 ```sql
 SELECT * FROM geo_data.regions_by_code WHERE timezone = 'America/Los_Angeles' ALLOW FILTERING;
 ```
@@ -373,3 +374,10 @@ SELECT * FROM geo_data.regions_by_code WHERE timezone = 'America/Los_Angeles' AL
            5 |     usa |     ca |  california | America/Los_Angeles
           29 |     usa |     nv |      nevada | America/Los_Angeles
 ```
+
+Performing queries without conditions, such as those lacking a WHERE clause, or with conditions that do not include the Partition Key, can incur significant overhead and should be minimized to avoid potential performance bottlenecks.
+
+Now the question is: how can we get all the rows from the table in a way that is performant and scalable?
+
+The answer has been discusssed already :). Choose a Partition Key that minimizes the number of partitions accessed during read operations while evenly distributing write operations across the cluster. 
+
