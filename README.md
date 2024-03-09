@@ -396,3 +396,14 @@ To overcome the limitations of scalability using partitioning alone, Cassandra e
 
 By replicating data to different nodes, we can access more data simultaneously from other nodes to improve latency and throughput. Replication also enables the cluster to service read and write operations in case a replica is not available.
 
+It's a requirement to define a replication factor for every keyspace in Cassandra. In production, replication factor is typically set to 3, but other values are also possible. 
+
+| Replication Factor | Affect                                                                                                                                                                                                                                                                                            |
+|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1                  | Only a single copy of each row exists in the cluster. If the node containing the row goes down, the row cannot be retrieved.                                                                                                                                                                      |
+| 2                  | Two copies of each row exist, where each copy is on a different node.  All replicas are equally important; there is no primary replica.                                                                                                                                                           |
+| 3                  | Each row is replicated across 3 different nodes ensuring high availability. The node the receives the write request becomes the coordinator node,  it is responsible for replicating that data to two other nodes. Provides a good balance between fault tolerance, consistency, and performance. |
+
+As a general guideline, the replication factor should ideally be less than or equal to the number of nodes in the cluster. However, there is flexibility to increase the replication factor initially and then scale the cluster by adding additional nodes as needed.
+
+What happens when a node fails during a read operation? Rather than reading from one of the replica nodes, Cassandra sends the request to multiple replicas and picks the most updated version from the set of results it gets. Most updated values can be defined by version number or any other ID that is increasing monotonically.
