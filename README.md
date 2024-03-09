@@ -211,7 +211,7 @@ Consider this table containing region data:
 | usa     | nv     | nevada      | 29          | America/Los_Angeles |
 | usa     | va     | virginia    | 47          | America/New_York    |
 
-Here, we will choose `country` as the Partition Key and `region_name` as the Clustering Key. A combination of both `country` and `region_name` will make up the Primary Key.
+Here, we will choose `country` as the partition key and `region_name` as the clustering key. A combination of both `country` and `region_name` will make up the primary key.
 
 Now, let us proceed to create the table using the CREATE TABLE construct:
 ```sql
@@ -225,7 +225,7 @@ CREATE TABLE geo_data.regions_by_country (
 );
 ```
 
-Note that the Primary Key consists of the Partition Key and the Clustering Key. The first group of the Primary Key specifies the Partition Key. All other parts of the Primary Key is one or more Clustering Keys. The Primary Key defines what columns are used to identify rows. Add all columns that are required to identify a row uniquely to the primary key. In our sample data, using just the `country` column would not uniquely identify each row, which is why we added `region_name` column to the Primary Key.
+Note that the primary key consists of the partition key and the clustering key. The first group of the primary key specifies the partition key. All other parts of the primary key is one or more clustering keys. The Primary Key defines what columns are used to identify rows. Add all columns that are required to identify a row uniquely to the primary key. In our sample data, using just the `country` column would not uniquely identify each row, which is why we added `region_name` column to the primary key.
 
 We'll now populate the table with the sample data using cqlsh:
 
@@ -275,17 +275,17 @@ Here's an illustration of how the data would be partitioned:
 
 
 Let's note a few things:
-1. Rows in each partition are ordered by the Clustering Key.
-2. Combination of Partition Key & Clustering Key uniquely identifies each row.
-3. Partition Key is used to create and populate the partitions.
-4. Data is read from and written to different nodes based on the Partiton Key.
+1. Rows in each partition are ordered by the clustering key.
+2. Combination of partition key & clustering key uniquely identifies each row.
+3. Partition key is used to create and populate the partitions.
+4. Data is read from and written to different nodes based on the partiton key.
 
 It may be apparent by now that it is super important to understand the distribution of data.
 We must carefully consider how the data is read and writitten among the partitions.
 
-The Partition Key helps distribute data evenly between nodes, it is also needed when reading the data.
+The partition key helps distribute data evenly between nodes, it is also needed when reading the data.
 
-Our schema for regions is designed to be queried by the Partition Key which is `country`.
+Our schema for regions is designed to be queried by the partition key which is `country`.
 
 ```sql
 SELECT * FROM geo_data.regions_by_country WHERE country = 'usa';
@@ -310,7 +310,7 @@ While a consistency level of one offers low latency and high availability for re
 
 ## Inefficient Partitioning
 
-Let's create another table and populate it to illustrate an inefficient Partition Key that will require Cassandra to gather data from multiple partitions.
+Let's create another table and populate it to illustrate an inefficient partition key that will require Cassandra to gather data from multiple partitions.
 
 ```sql
 CREATE TABLE geo_data.regions_by_code (
@@ -346,7 +346,7 @@ APPLY BATCH;
 Assume Cassandra assigns the above rows as shown here:
 ![cassandra partition 2](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/3dc3b2cc-3515-4d1d-a81a-4633edb77c9c)
 
-This new table uses `region_code` as the Partition Key. If the use case requires us to get region data by its code, then the following query will work efficiently because Cassandra only needs to read from 1 partition for the data:
+This new table uses `region_code` as the partition key. If the use case requires us to get region data by its code, then the following query will work efficiently because Cassandra only needs to read from 1 partition for the data:
 
 ```sql
 SELECT * FROM geo_data.regions_by_code WHERE region_code = 5;
@@ -363,7 +363,7 @@ SELECT * FROM geo_data.regions_by_code WHERE timezone = 'America/Los_Angeles';
 InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
 ```
 
-Since we want to filter by a column that is not a Partition Key (i.e. `timezone`), we have to tell Cassandra to filter by a non-partition key column using `ALLOW FILTERING`.
+Since we want to filter by a column that is not a partition key (i.e. `timezone`), we have to tell Cassandra to filter by a non-partition key column using `ALLOW FILTERING`.
 
 ```sql
 SELECT * FROM geo_data.regions_by_code WHERE timezone = 'America/Los_Angeles' ALLOW FILTERING;
@@ -375,9 +375,16 @@ SELECT * FROM geo_data.regions_by_code WHERE timezone = 'America/Los_Angeles' AL
           29 |     usa |     nv |      nevada | America/Los_Angeles
 ```
 
-Performing queries without conditions, such as those lacking a WHERE clause, or with conditions that do not include the Partition Key, can incur significant overhead and should be minimized to avoid potential performance bottlenecks.
+Performing queries without conditions, such as those lacking a WHERE clause, or with conditions that do not include the partition key, can incur significant overhead and should be minimized to avoid potential performance bottlenecks.
 
 Now the question is: how can we get all the rows from the table in a way that is performant and scalable?
 
-The answer has been discusssed already :). Choose a Partition Key that minimizes the number of partitions accessed during read operations while evenly distributing write operations across the cluster. 
+The answer has been discusssed already :).
 
+**Choose a partition key that minimizes the number of partitions accessed during read operations while evenly distributing write operations across the cluster.**
+
+## Replication
+
+Partitioning is certainly useful but it will not be enough to achieve high scalability. Let's discuss why.
+
+1. Single partition key space: Each partition key maps to a specific node in the cluster, and all data with the same partition key resides on that node. As the amount of data grows, the capacity of individual nodes can become a bottleneck. Eventually, the storage capacity, memory, or compute resources of a single node may be insufficient to handle the increasing volume of data or workload.
