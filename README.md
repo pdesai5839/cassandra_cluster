@@ -228,7 +228,7 @@ CREATE TABLE sfo_passenger_traffic.traffic_by_date (
 );
 ```
 
-Note that the Primary Key consists of the Partition Key and the Clustering Key. The first group of the Primary Key specifies the Partition Key. All other parts of the Primary Key is one or more Clustering Keys.
+Note that the Primary Key consists of the Partition Key and the Clustering Key. The first group of the Primary Key specifies the Partition Key. All other parts of the Primary Key is one or more Clustering Keys. The Primary Key defines what columns are used to identify rows. Add all columns that are required to identify a row uniquely to the primary key. In our sample data, using just the `date` column would not uniquely identify each row, which is why we added `terminal` column to the Primary Key.
 
 ## Insert Sample Data
 
@@ -300,3 +300,6 @@ Couple of things to note in the image above:
 It may be apparent by now that it is super important to understand the distribution of data.
 We must carefully consider how the data is read and writitten among the partitions.
 
+The Partition Key helps distribute data evenly between nodes, it is also needed when reading the data.
+
+Our schema for SFO data is designed to be queried by the Partition Key which is `date`.
