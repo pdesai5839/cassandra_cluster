@@ -118,7 +118,7 @@ CREATE KEYSPACE geo_data
 
 What did we just do? We just created a keyspace named `geo_data` with these replication settings:
 * The replication strategy specified is "NetworkTopologyStrategy". This strategy is used to replicate data across multiple data centers in a Cassandra cluster.
-* Within the "NetworkTopologyStrategy", the replication factor for the "datacenter1" is set to 3. This means that the data in this keyspace will be replicated across three nodes within the "datacenter1" data center.
+* Within the "NetworkTopologyStrategy", the replication factor for the "datacenter1" is set to 3. This means that the data in this keyspace will be replicated across 3 nodes within the "datacenter1" data center.
 
 # Importance of Replication Factor
 
@@ -344,6 +344,7 @@ APPLY BATCH;
 ```
 
 Assume Cassandra assigns the above rows as shown here:
+![cassandra partition 2](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/3dc3b2cc-3515-4d1d-a81a-4633edb77c9c)
 
 
 This new table that uses `region_code` as the Partition Key. If the use case requires us to get region data by its code, then the following query will work efficiently:
