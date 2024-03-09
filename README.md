@@ -205,11 +205,11 @@ Consider this table containing region data:
 
 | country | region | region_name | region_code | timezone            |
 |---------|--------|-------------|-------------|---------------------|
+| fra     | bre    | bretagne    | 34974       | Europe/Paris        |
+| fra     | nor    | normandie   | 34980       | Europe/Paris        |
 | usa     | ca     | california  | 5           | America/Los_Angeles |
 | usa     | nv     | nevada      | 29          | America/Los_Angeles |
 | usa     | va     | virginia    | 47          | America/New_York    |
-| fra     | bre    | bretagne    | 34974       | Europe/Paris        |
-| fra     | nor    | normandie   | 34980       | Europe/Paris        |
 
 Here, we will choose `country` as the Partition Key and `region_name` as the Clustering Key. A combination of both `country` and `region_name` will make up the Primary Key.
 
@@ -233,6 +233,12 @@ We'll now populate the table with the sample data using cqlsh:
 BEGIN BATCH 
 
 INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
+  VALUES('fra','bre','bretagne',34974,'Europe/Paris');
+
+INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
+  VALUES('fra','nor','normandie',34980,'Europe/Paris');
+
+INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
   VALUES('usa','ca','california',5,'America/Los_Angeles');
 
 INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
@@ -240,12 +246,6 @@ INSERT INTO geo_data.regions_by_country (country, region, region_name, region_co
 
 INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
   VALUES('usa','va','virginia',47,'America/New_York');
-
-INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
-  VALUES('fra','bre','bretagne',34974,'Europe/Paris');
-
-INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
-  VALUES('fra','nor','normandie',34980,'Europe/Paris');
 
 APPLY BATCH;
 ```
@@ -310,15 +310,50 @@ While a consistency level of one offers low latency and high availability for re
 
 ## Inefficient Partitioning
 
-Let's create another table to illustrate choosing a Partition Key that will require Cassandra to gather data from multiple partitions. This query will not perform well.
+Let's create another table and populate it to illustrate an inefficient Partition Key that will require Cassandra to gather data from multiple partitions.
 
 ```sql
-CREATE TABLE geo_data.regions_by_timezone (
+CREATE TABLE geo_data.regions_by_code (
     country text,
     region text,
     region_name text,
+    region_code int,
     timezone text,
-    PRIMARY KEY (timezone)
+    PRIMARY KEY (region_code)
 );
 ```
+```sql
+BEGIN BATCH 
 
+INSERT INTO geo_data.regions_by_code (country, region, region_name, region_code, timezone)
+  VALUES('fra','bre','bretagne',34974,'Europe/Paris');
+
+INSERT INTO geo_data.regions_by_code (country, region, region_name, region_code, timezone)
+  VALUES('fra','nor','normandie',34980,'Europe/Paris');
+
+INSERT INTO geo_data.regions_by_code (country, region, region_name, region_code, timezone)
+  VALUES('usa','ca','california',5,'America/Los_Angeles');
+
+INSERT INTO geo_data.regions_by_code (country, region, region_name, region_code, timezone)
+  VALUES('usa','nv','nevada',29,'America/Los_Angeles');
+
+INSERT INTO geo_data.regions_by_code (country, region, region_name, region_code, timezone)
+  VALUES('usa','va','virginia',47,'America/New_York');
+
+APPLY BATCH;
+```
+
+Assume Cassandra assigns the above rows as shown here:
+
+
+This new table that uses `region_code` as the Partition Key. If the use case requires us to get region data by its code, then the following query will work efficiently:
+
+```sql
+SELECT * FROM geo_data.regions_by_code WHERE region_code = 5;
+```
+
+However, if the application needs all regions based on the timezone:
+
+```sql
+SELECT * FROM geo_data.regions_by_code WHERE timezone = 'America/Los_Angeles';
+```
