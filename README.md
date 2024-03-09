@@ -488,7 +488,7 @@ Reading is more expensive since it may require checking different disk locations
 As with consistency levels, Cassandra's storage engine can be tuned for reading performance or writing performance.
 
 ### Data Compaction
-Data compaction in Cassandra refers to the process of organizing and optimizing data stored in SSTable files to improve performance and reduce storage overhead.
+Data compaction in Cassandra refers to the process of organizing and optimizing data stored in on disk to improve performance and reduce storage overhead.
 
 Cassandra allows you to set various merge and compaction strategies for a table. These strategies affect read and write performance:
 1. Size-tiered Compaction Strategy (STCS): STCS is the default compaction strategy in Cassandra. STCS is well-suited for write-heavy workloads and can efficiently reclaim disk space by removing obsolete data.
@@ -498,3 +498,4 @@ Cassandra allows you to set various merge and compaction strategies for a table.
 
 It is important to consider the compaction startegy at the outset when creating the tables. Although you can alter the compaction strategy of an existing table, it will lead to significant performance issues in a production system.
 
+## Data Presorting
