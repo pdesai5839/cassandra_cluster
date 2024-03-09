@@ -303,3 +303,21 @@ We must carefully consider how the data is read and writitten among the partitio
 The Partition Key helps distribute data evenly between nodes, it is also needed when reading the data.
 
 Our schema for SFO data is designed to be queried by the Partition Key which is `date`.
+
+```shell
+cqlsh> SELECT * FROM sfo_passenger_traffic.traffic_by_date WHERE date = '2023-11-10';
+
+ date       | terminal | total_flights | total_passengers
+------------+----------+---------------+------------------
+ 2023-11-10 |       T1 |           368 |           303866
+ 2023-11-10 |       T2 |           425 |           321195
+ 2023-11-10 |       T3 |           375 |           254921
+
+(3 rows)
+```
+
+This query would have been sent to a single node by default. This is know as consistency level of one.
+
+So, what exactly is consistency level of one?
+
+A consistency level of ONE indicates that a read or write operation must be acknowledged by only one replica node.
