@@ -389,4 +389,10 @@ Partitioning is certainly useful but it will not be enough to achieve high scala
 
 1. Single partition key space: Each partition key maps to a specific node in the cluster, and all data with the same partition key resides on that node. As the amount of data grows, the capacity of individual nodes can become a bottleneck. Eventually, the storage capacity, memory, or compute resources of a single node may be insufficient to handle the increasing volume of data or workload.
 2. Hot spots: In some cases, certain partition keys may become "hot spots," meaning they are accessed more frequently than others. Hot spots can occur due to uneven data distribution or skewed access patterns, leading to uneven load distribution across nodes. Hot spots can impact performance and scalability by overloading specific nodes while underutilizing others.
-3. 
+3. Limited horizontal scaling: While partitioning allows Cassandra to scale horizontally by adding more nodes to the cluster, it does not address all scalability challenges. Adding more nodes can increase the cluster's overall capacity and throughput, but it does not necessarily improve performance for specific partitions or hot spots. In some cases, adding more nodes may even worsen the hot spot issues if the new nodes do not effectively distribute the workload.
+4. Data skew: In real-world applications, data distribution may not be perfectly uniform, leading to data skew. Data skew occurs when certain partitions or partition keys contain significantly more data than others. Data skew can lead to uneven resource utilization, hot spots, and performance degradation.
+
+To overcome the limitations of scalability using partitioning alone, Cassandra employs additional mechanisms such as data replication.
+
+By replicating data to different nodes, we can access more data simultaneously from other nodes to improve latency and throughput. Replication also enables the cluster to service read and write operations in case a replica is not available.
+
