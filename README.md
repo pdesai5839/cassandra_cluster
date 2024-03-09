@@ -435,7 +435,6 @@ In a strong consistency model, when a read operation returns a value, it guarant
 According to the CAP theorem, the cluster can not be available and consistent at the same time when nodes can not communicate with each other. A strong consistency model implies that data consistency is favored when this happens even if it means that some nodes are marked as unavailable. When a Cassandra node becomes unavailable, processing continues and failed writes are temporarily saved as hints on the coordinator node. If the hints have not expired, they are applied to the node when it becomes available.
 
 ### Tune for Strong Consistency
-
 Let's recall: Consistency level means how many nodes need to acknowledge a read or a write query for that operation to be considered successful.
 
 To achieve strong consistency, the number of replica nodes that respond to a read or write operation must be greater than the replication factor.
@@ -445,18 +444,39 @@ R + W > N
 where R = Read Consistency, W = Write Consistency, N = Replication Factor
 ```
 
-### Read Heavy System
+#### Read Heavy System
 For a read-heavy system, it's a good idea to keep read consistency low because reads vastly outnumber writes. 
-Assuming a replication factor of 3, the formula would look like this:
+Assuming a replication factor of 3:
 ```
 1 + W > 3
 ```
 Therefore, the write consistency must be 3 to achieve strong consistentcy in a read-heavy system.
 
-### Write Heavy System
+#### Write Heavy System
 For a write-heavy system, it's a good idea to keep write consistency low because writes vastly outnumber reads. 
-Assuming a replication factor of 3, the formula would look like this:
+Assuming a replication factor of 3:
 ```
 R + 1 > 3
 ```
 Therefore, the read consistency must be 3 to achieve strong consistentcy in a write-heavy system.
+
+### Tune for Eventual Consistency
+If strong consistency is not needed, you can reduce the consistency level for queries to 1 for higher performance:
+```sql
+CONSISTENCY ONE;
+SELECT * FROM geo_data.regions_by_country WHERE country = 'usa';
+```
+```shell
+Consistency level set to ONE.
+
+ country | region_name | region | region_code | timezone
+---------+-------------+--------+-------------+---------------------
+     usa |  california |     ca |           5 | America/Los_Angeles
+     usa |      nevada |     nv |          29 | America/Los_Angeles
+     usa |    virginia |     va |          47 |    America/New_York
+
+(3 rows)
+```
+
+The data will eventually be spread to all replicas. This will ensure eventual consistency. How fast the consistency is achieved depends on different mechanics that sync data between nodes.
+
