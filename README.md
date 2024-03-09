@@ -413,3 +413,10 @@ What happens when a node fails during a read operation? Rather than reading from
 Cassandra supports a tunable consistency model which provides the ability to adjust the level of consistency for read and write operations based on specific requirements and trade-offs. Cassandra provides tunable consistency levels to accommodate a wide range of use cases, balancing consistency, availability, and partition tolerance.
 
 A consistency level of ONE is the default or both read and write operations. For all other available options, refer to the help [page](https://docs.datastax.com/en/cassandra-oss/3.x/cassandra/dml/dmlConfigConsistency.html).
+
+Let's look at some of the more important consistency levels.
+
+### Strong Consistency
+In a strong consistency model, when a read operation returns a value, it guarantees that the value is the latest one that was successfully written to at least one replica node in the cluster.
+
+According to the CAP theorem, the cluster can not be available and consistent at the same time when nodes can not communicate with each other. A strong consistency model implies that data consistency is favored when this happens even if it means that some nodes are marked as unavailable.
