@@ -354,6 +354,11 @@ SELECT * FROM geo_data.regions_by_code WHERE region_code = 5;
 
 However, if the application needs all regions based on the timezone, then data would need to come from multiple partitons. Since these partitions are spead out over multile nodes, talking to these nodes will be expensive and can cause performance issues on a large cluster.
 
+Cassandra will not run this query because it tries to avoid expensive queries:
+
 ```sql
 SELECT * FROM geo_data.regions_by_code WHERE timezone = 'America/Los_Angeles';
+```
+```shell
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
 ```
