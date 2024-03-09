@@ -270,8 +270,9 @@ SELECT * FROM geo_data.regions_by_country;
 ## Efficient Partitioning
 The `regions_by_country` table uses `country` as the Partition Key. What does this mean? It means that all rows matching a country value will be placed in the same partition.
 
-Here's an illustrated version:
-![cassandra partition (1)](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/efeb261f-ec8a-4235-8067-f6b2a682c3a8)
+Here's an illustration of how the data would be partitioned:
+![cassandra partition (2)](https://github.com/pdesai5839/cassandra_cluster/assets/143283961/7a722162-1c76-49c8-aa5a-c299e10045ad)
+
 
 Let's note a few things:
 1. Rows in each partition are ordered by the Clustering Key.
@@ -290,11 +291,11 @@ Our schema for regions is designed to be queried by the Partition Key which is `
 SELECT * FROM geo_data.regions_by_country WHERE country = 'usa';
 ```
 ```shell
- country | region_name | region | timezone
----------+-------------+--------+---------------------
-     usa |  california |     ca | America/Los_Angeles
-     usa |      nevada |     nv | America/Los_Angeles
-     usa |    virginia |     va |    America/New_York
+ country | region_name | region | region_code | timezone
+---------+-------------+--------+-------------+---------------------
+     usa |  california |     ca |           5 | America/Los_Angeles
+     usa |      nevada |     nv |          29 | America/Los_Angeles
+     usa |    virginia |     va |          47 |    America/New_York
 
 (3 rows)
 ```
