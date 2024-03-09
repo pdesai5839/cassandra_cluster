@@ -407,3 +407,9 @@ It's a requirement to define a replication factor for every keyspace in Cassandr
 As a general guideline, the replication factor should ideally be less than or equal to the number of nodes in the cluster. However, there is flexibility to increase the replication factor initially and then scale the cluster by adding additional nodes as needed.
 
 What happens when a node fails during a read operation? Rather than reading from one of the replica nodes, Cassandra sends the request to multiple replicas and picks the most updated version from the set of results it gets. Most updated values can be defined by version number or any other ID that is increasing monotonically.
+
+## Consistency Level
+
+Cassandra supports a tunable consistency model which provides the ability to adjust the level of consistency for read and write operations based on specific requirements and trade-offs. Cassandra provides tunable consistency levels to accommodate a wide range of use cases, balancing consistency, availability, and partition tolerance.
+
+A consistency level of ONE is the default or both read and write operations. For all other available options, refer to the help [page](https://docs.datastax.com/en/cassandra-oss/3.x/cassandra/dml/dmlConfigConsistency.html).
