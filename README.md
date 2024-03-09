@@ -419,4 +419,6 @@ Let's look at some of the more important consistency levels.
 ### Strong Consistency
 In a strong consistency model, when a read operation returns a value, it guarantees that the value is the latest one that was successfully written to at least one replica node in the cluster.
 
-According to the CAP theorem, the cluster can not be available and consistent at the same time when nodes can not communicate with each other. A strong consistency model implies that data consistency is favored when this happens even if it means that some nodes are marked as unavailable.
+According to the CAP theorem, the cluster can not be available and consistent at the same time when nodes can not communicate with each other. A strong consistency model implies that data consistency is favored when this happens even if it means that some nodes are marked as unavailable. When a Cassandra node becomes unavailable, processing continues and failed writes are temporarily saved as hints on the coordinator node. If the hints have not expired, they are applied to the node when it becomes available.
+
+
