@@ -655,3 +655,11 @@ Of course, one can reference data by ID in Cassandra, but this needs to be done 
 
 Cassandra is designed and built for scale. If you start normalizing your tables to reduce duplication, then you sacrifice horizontal scalability.
 
+If you still want to use foreign keys instead of data duplication, you might want to use another database.
+
+## Indexes
+In Cassandra, indexes are data structures used to facilitate efficient lookup of data based on specific column values.
+Cassandra supports two types of indexes:
+
+1. Secondary Indexes: Secondary indexes in Cassandra are created on non-primary key columns of a table. They allow users to query data based on column values other than the primary key. However, secondary indexes come with certain limitations, including potential performance issues and scalability concerns, particularly for large datasets or high-cardinality columns.
+2. Materialized Views: Materialized views in Cassandra provide a way to precompute and store query results based on specific criteria. They allow users to define alternative "views" of data, denormalized or aggregated based on certain columns or conditions. Materialized views are automatically updated by Cassandra as the underlying data changes, ensuring consistency and efficiency of query execution. Materialized views are particularly useful for optimizing read-heavy workloads or queries that require data aggregation or denormalization.
