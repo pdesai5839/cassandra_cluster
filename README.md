@@ -644,3 +644,14 @@ SELECT * FROM grocery_list.items_shared_by_target_user_name;
          ronnie56 | 2024-03-10 05:45:02.041000+0000 | Eggs (1 dozen) |      alice.smith
 ```
 
+## Use Foreign Keys Instead of Duplicating Data
+Traditionally, foreign keys are references to an entity by its ID that are located in another table. It is guaranteed that the referenced ID exists.
+
+In Cassandra, it may be tempting to use foreign keys because it will mean less duplicated data. However, think about how this will affect scalability.
+
+Using normalized tables may be the best practice in SQL world, but it goes against many principles of a NoSQL data store such as Cassandra.
+
+Of course, one can reference data by ID in Cassandra, but this needs to be done by the application itself. It also means reading and writing data to multiple partitions at once.
+
+Cassandra is designed and built for scale. If you start normalizing your tables to reduce duplication, then you sacrifice horizontal scalability.
+
