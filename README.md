@@ -547,10 +547,13 @@ At its core, Cassandra is still like a key-value store. Therefore, you can only 
 * `country` and `timezone`
 * `country`, `timezone`, and `region_name`
 
-## Data Modeling
-
 You can not query the table by:
 * `country` and `region_name`
 * `country` and `region`
 * `country` and `region_code`
+
+## Data Modeling
+Let us now create a data model for an application that allows users to create grocery lists.
+
+Since table design is dictated by query access patterns, we need to analyze the usage with user stories.
 
