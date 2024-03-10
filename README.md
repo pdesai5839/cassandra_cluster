@@ -555,10 +555,13 @@ You can not query the table by:
 ## Data Modeling
 Let us now create a data model for an application that allows users to create grocery lists.
 
-Since table design is dictated by query access patterns, we need to analyze the usage with user stories.
+Since table design is dictated by query access patterns, we need to analyze the usage with user stories. For brevity, we'll just consider a few scenarios. 
 
 User Story: As a user, I want to add items to a grocery list.
 
-User Story: As a user, I want to see all of the items in my grocery list in order (ascending by item name).
+User Story: As a user, I want to see all of the items in my grocery list by insertion time (i.e., newest elements first).
+
+A query pattern emerges after examining these user stories. It's obvious that we need a table to store and retrieve grocery list items by user id. This ensures that all item data for a particular user id are stored on the same partition. Also, user wants to see the items sorted by time which means we'll need a `created_at` column that will also serve as a clustering key.
+
 
 
