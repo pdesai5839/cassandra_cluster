@@ -588,8 +588,22 @@ User Story 4: As a user, I want to see all the items I have shared with other us
 
 Based on the user stories, both tables will need the required `user_id` as partition keys to allow for efficient queries. Also, `created_at` is added as a clustering column for sorting and uniqueness:
 
+```sql
+CREATE TABLE grocery_list.items_shared_by_target_user_id (
+    target_user_id uuid,
+    source_userid uuid,
+    created_at timestamp,
+    name text,
+    PRIMARY KEY ((target_user_id), created_at)
+) WITH CLUSTERING ORDER BY (created_at DESC)
+AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
 
-
-
-
-
+CREATE TABLE grocery_list.items_shared_by_source_user_id (
+    target_user_id uuid,
+    source_user_id uuid,
+    created_at timestamp,
+    name text,
+    PRIMARY KEY ((source_user_id), created_at)
+) WITH CLUSTERING ORDER BY (created_at DESC)
+AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
+```
