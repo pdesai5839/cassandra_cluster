@@ -572,7 +572,7 @@ CREATE KEYSPACE grocery_list
 ```
 ```sql
 CREATE TABLE grocery_list.items_by_user_id (
-    user_id int,
+    user_id uuid,
     name text,
     created_at timestamp,
     PRIMARY KEY ((user_id), created_at)
@@ -585,6 +585,11 @@ User Story 3: As a user, I want to share a grocery list item with another user (
 To get all the items shared with a user, we'll need a table to store all shared items for the target user. The item name needs to be a part of this table as well so it can be displayed.
 
 User Story 4: As a user, I want to see all the items I have shared with other users.
+
+Based on the user stories, both tables will need the required `user_id` as partition keys to allow for efficient queries. Also, `created_at` is added as a clustering column for sorting and uniqueness:
+
+
+
 
 
 
