@@ -557,3 +557,8 @@ Let us now create a data model for an application that allows users to create gr
 
 Since table design is dictated by query access patterns, we need to analyze the usage with user stories.
 
+User Story: As a user, I want to add items to a grocery list.
+
+User Story: As a user, I want to see all of the items in my grocery list in order (ascending by item name).
+
+
