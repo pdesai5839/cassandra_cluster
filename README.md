@@ -611,7 +611,7 @@ AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
 The process of data modeling in Cassandra is quite different than the typical process we follow in the relational world. In SQL, we normalize the data and create a rigid structure around it. In NoSQL, we duplicate values (de-normalize) between tables, try to organize the data for efficient read and write operations (partition key), apply presorting and uniqueness (clustering key).
 
 ### Using BATCH to Keep Data in Sync
-Due to the duplication, keeping data consistent across multiple tables is essential. In Cassandra, you can do that by using BATCH statements that give you an all-at-once guarantee, also called atomicity.
+Due to the need for data duplication, keeping data consistent across multiple tables is essential. In Cassandra, you can do that by using BATCH statements that give you an all-at-once guarantee, also called atomicity.
 
 Batch statements are cheap on a single partition, but dangerous when used on different partitions. There are a few reasons for this:
 * Performance Impact: Batch statements can lead to performance issues, especially for large batches or when executed frequently. Since batch statements are processed as a single operation, they can cause increased memory consumption and longer execution times, resulting in degraded performance for both read and write operations.
