@@ -573,7 +573,7 @@ CREATE KEYSPACE grocery_list
 ```sql
 CREATE TABLE grocery_list.items_by_user_id (
     user_id uuid,
-    name text,
+    item_name text,
     created_at timestamp,
     PRIMARY KEY ((user_id), created_at)
 ) WITH CLUSTERING ORDER BY (created_at DESC)
@@ -593,7 +593,7 @@ CREATE TABLE grocery_list.items_shared_by_target_user_id (
     target_user_id uuid,
     source_userid uuid,
     created_at timestamp,
-    name text,
+    item_name text,
     PRIMARY KEY ((target_user_id), created_at)
 ) WITH CLUSTERING ORDER BY (created_at DESC)
 AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
@@ -602,11 +602,13 @@ CREATE TABLE grocery_list.items_shared_by_source_user_id (
     target_user_id uuid,
     source_user_id uuid,
     created_at timestamp,
-    name text,
+    item_name text,
     PRIMARY KEY ((source_user_id), created_at)
 ) WITH CLUSTERING ORDER BY (created_at DESC)
 AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
 ```
 
 The process of data modeling in Cassandra is quite different than the typical process we follow in the relational world. In SQL, we normalize the data and create a rigid structure around it. In NoSQL, we duplicate values (de-normalize) between tables, try to organize the data for efficient read and write operations (partition key), apply presorting and uniqueness (clustering key).
+
+### Using BATCH to Keep Data in Sync
 
