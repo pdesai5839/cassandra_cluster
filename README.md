@@ -694,3 +694,8 @@ SELECT * from grocery_list.items_by_user_name WHERE user_name = 'Will.Peters';
 
 (0 rows)
 ```
+
+Setting a TTL is one of many ways to create and execute tombstones. There are also other ways. For example, if you insert a null value, a tombstone is created for the given cell.
+
+## Differences in INSERT vs UPDATE
+Well, there is no difference between an insert and an update in Cassandra. An insert is same as an update, and vice versa.
