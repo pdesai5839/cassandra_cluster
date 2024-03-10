@@ -607,3 +607,6 @@ CREATE TABLE grocery_list.items_shared_by_source_user_id (
 ) WITH CLUSTERING ORDER BY (created_at DESC)
 AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
 ```
+
+The process of data modeling in Cassandra is quite different than the typical process we follow in the relational world. In SQL, we normalize the data and create a rigid structure around it. In NoSQL, we duplicate values (de-normalize) between tables, try to organize the data for efficient read and write operations (partition key), apply presorting and uniqueness (clustering key).
+
