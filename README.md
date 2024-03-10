@@ -666,3 +666,31 @@ Cassandra supports two types of indexes:
 
 It's important to carefully consider the trade-offs and limitations associated with indexes, such as increased storage overhead, potential performance impact on write operations, and maintenance complexity.
 
+## Tombstones
+In Cassandra, tombstones are special markers used to represent deleted data. When a row or column is deleted in Cassandra, instead of immediately removing the data from disk, Cassandra marks the data as deleted by inserting a tombstone in its place.
+
+You can set a time to live (TTL) on inserted data. After the specified time has passed, the record will be automatically deleted. When you set a time to live (TTL), a tombstone is created with a date in the future.
+
+Let us now create a tombstone by setting a TTL in seconds. This basically functions as a delayed delete:
+```sql
+INSERT INTO grocery_list.items_by_user_name (user_name, created_at, item_name) VALUES('Will.Peters', toTimestamp(now()), 'Bread (Sourdough)') USING TTL 60;
+```
+Check the record:
+```sql
+SELECT * from grocery_list.items_by_user_name WHERE user_name = 'Will.Peters';
+```
+```shell
+ user_name   | created_at                      | item_name
+-------------+---------------------------------+-------------------
+ Will.Peters | 2024-03-10 06:22:46.510000+0000 | Bread (Sourdough)
+```
+Now we wait 60 seconds and run the select query again to see that the row is gone:
+```sql
+SELECT * from grocery_list.items_by_user_name WHERE user_name = 'Will.Peters';
+```
+```shell
+ user_name | created_at | item_name
+-----------+------------+-----------
+
+(0 rows)
+```
