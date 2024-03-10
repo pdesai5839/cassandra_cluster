@@ -113,7 +113,7 @@ CREATE KEYSPACE geo_data
   WITH REPLICATION = { 
    'class' : 'NetworkTopologyStrategy',
    'datacenter1' : 3 
-  };
+};
 ```
 
 What did we just do? We just created a keyspace named `geo_data` with these replication settings:
@@ -208,7 +208,7 @@ Consider this table containing region data:
 | fra     | bre    | bretagne    | 34974       | Europe/Paris        |
 | fra     | nor    | normandie   | 34980       | Europe/Paris        |
 | usa     | ca     | california  | 5           | America/Los_Angeles |
-| usa     | nv     | nevada      | 29          | America/Los_Angeles |
+| usa     | co     | colorado    | 6           | America/Denver      |
 | usa     | va     | virginia    | 47          | America/New_York    |
 
 Here, we will choose `country` as the partition key and `region_name` as the clustering key. A combination of both `country` and `region_name` will make up the primary key.
@@ -242,7 +242,7 @@ INSERT INTO geo_data.regions_by_country (country, region, region_name, region_co
   VALUES('usa','ca','california',5,'America/Los_Angeles');
 
 INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
-  VALUES('usa','nv','nevada',29,'America/Los_Angeles');
+  VALUES('usa','co','colorado',6,'America/Denver');
 
 INSERT INTO geo_data.regions_by_country (country, region, region_name, region_code, timezone)
   VALUES('usa','va','virginia',47,'America/New_York');
@@ -261,10 +261,8 @@ SELECT * FROM geo_data.regions_by_country;
      fra |    bretagne |    bre |       34974 |        Europe/Paris
      fra |   normandie |    nor |       34980 |        Europe/Paris
      usa |  california |     ca |           5 | America/Los_Angeles
-     usa |      nevada |     nv |          29 | America/Los_Angeles
+     usa |    colorado |     co |           6 |      America/Denver
      usa |    virginia |     va |          47 |    America/New_York
-
-(5 rows)
 ```
 
 ## Efficient Partitioning
@@ -294,10 +292,8 @@ SELECT * FROM geo_data.regions_by_country WHERE country = 'usa';
  country | region_name | region | region_code | timezone
 ---------+-------------+--------+-------------+---------------------
      usa |  california |     ca |           5 | America/Los_Angeles
-     usa |      nevada |     nv |          29 | America/Los_Angeles
+     usa |    colorado |     co |           6 |      America/Denver
      usa |    virginia |     va |          47 |    America/New_York
-
-(3 rows)
 ```
 
 This query would have been sent to a single node by default. This is known as consistency level of one.
@@ -335,7 +331,7 @@ INSERT INTO geo_data.regions_by_code (country, region, region_name, region_code,
   VALUES('usa','ca','california',5,'America/Los_Angeles');
 
 INSERT INTO geo_data.regions_by_code (country, region, region_name, region_code, timezone)
-  VALUES('usa','nv','nevada',29,'America/Los_Angeles');
+  VALUES('usa','co','colorado',6,'America/Denver');
 
 INSERT INTO geo_data.regions_by_code (country, region, region_name, region_code, timezone)
   VALUES('usa','va','virginia',47,'America/New_York');
@@ -357,7 +353,7 @@ However, if the application needs all regions based on the timezone, then data w
 Cassandra will not run this query because it tries to avoid expensive queries that may cause performance issues:
 
 ```sql
-SELECT * FROM geo_data.regions_by_code WHERE timezone = 'America/Los_Angeles';
+SELECT * FROM geo_data.regions_by_code WHERE timezone = 'Europe/Paris';
 ```
 ```shell
 InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
@@ -366,13 +362,13 @@ InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot exe
 Since we want to filter by a column that is not a partition key (i.e. `timezone`), we have to tell Cassandra to filter by a non-partition key column using `ALLOW FILTERING`.
 
 ```sql
-SELECT * FROM geo_data.regions_by_code WHERE timezone = 'America/Los_Angeles' ALLOW FILTERING;
+SELECT * FROM geo_data.regions_by_code WHERE timezone = 'Europe/Paris' ALLOW FILTERING;
 ```
 ```shell
  region_code | country | region | region_name | timezone
--------------+---------+--------+-------------+---------------------
-           5 |     usa |     ca |  california | America/Los_Angeles
-          29 |     usa |     nv |      nevada | America/Los_Angeles
+-------------+---------+--------+-------------+--------------
+       34980 |     fra |    nor |   normandie | Europe/Paris
+       34974 |     fra |    bre |    bretagne | Europe/Paris
 ```
 
 Performing queries without conditions, such as those lacking a WHERE clause, or with conditions that do not include the partition key, can incur significant overhead and should be minimized to avoid potential performance bottlenecks.
@@ -472,10 +468,8 @@ Consistency level set to ONE.
  country | region_name | region | region_code | timezone
 ---------+-------------+--------+-------------+---------------------
      usa |  california |     ca |           5 | America/Los_Angeles
-     usa |      nevada |     nv |          29 | America/Los_Angeles
+     usa |    colorado |     co |           6 |      America/Denver
      usa |    virginia |     va |          47 |    America/New_York
-
-(3 rows)
 ```
 
 The data will eventually be spread to all replicas. This will ensure eventual consistency. How fast the consistency is achieved depends on different flows that sync data between nodes.
@@ -526,7 +520,7 @@ INSERT INTO geo_data.regions_by_country_sort_by_tz_asc (country, region, region_
   VALUES('usa','ca','california',5,'America/Los_Angeles');
 
 INSERT INTO geo_data.regions_by_country_sort_by_tz_asc (country, region, region_name, region_code, timezone)
-  VALUES('usa','nv','nevada',29,'America/Los_Angeles');
+  VALUES('usa','co','colorado',6,'America/Denver');
 
 INSERT INTO geo_data.regions_by_country_sort_by_tz_asc (country, region, region_name, region_code, timezone)
   VALUES('usa','va','virginia',47,'America/New_York');
@@ -540,7 +534,23 @@ SELECT * FROM geo_data.regions_by_country_sort_by_tz_asc where country = 'usa';
 ```shell
  country | timezone            | region_name | region | region_code
 ---------+---------------------+-------------+--------+-------------
+     usa |      America/Denver |    colorado |     co |           6
      usa | America/Los_Angeles |  california |     ca |           5
-     usa | America/Los_Angeles |      nevada |     nv |          29
      usa |    America/New_York |    virginia |     va |          47
 ```
+
+In this table, keep in mind that the clustering columns are `timezone` and `region_name`
+From the results, we see that Cassandra sorted the data first by `timezone` and then by `region_name`.
+
+At its core, Cassandra is still like a key-value store. Therefore, you can only query the table by:
+* `country`
+* `country` and `timezone`
+* `country`, `timezone`, and `region_name`
+
+## Data Modeling
+
+You can not query the table by:
+* `country` and `region_name`
+* `country` and `region`
+* `country` and `region_code`
+
