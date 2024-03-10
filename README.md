@@ -557,11 +557,10 @@ Let us now create a data model for an application that allows users to create gr
 
 Since table design is dictated by query access patterns, we need to analyze the usage with user stories. For brevity, we'll just consider a few scenarios. 
 
-User Story 1: As a user, I want to add items to a grocery list.
-
+User Story 1: As a user, I want to create a grocery list item.
 User Story 2: As a user, I want to see all of the items in my grocery list by insertion time (i.e., newest elements first).
 
-A query pattern emerges after examining these user stories. It's obvious that we need a table to store and retrieve grocery list items by user id. This ensures that all item data for a particular user id are stored on the same partition. Also, user wants to see the items sorted by time which means we'll need a `created_at` column that will also serve as a clustering key.
+A query pattern emerges after examining these user stories. It's obvious that we need a table to store and retrieve grocery list items by user id. This ensures that all items for a particular user id are stored on the same partition. Also, user wants to see the items sorted by time which means we'll need a `created_at` column that will also serve as a clustering key.
 
 Let's create a keyspace and the initial table:
 ```sql
@@ -580,3 +579,12 @@ CREATE TABLE grocery_list.items_by_user_id (
 ) WITH CLUSTERING ORDER BY (created_at DESC)
 AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
 ```
+
+User Story 3: As a user, I want to share a grocery list item with another user (i.e., another family member).
+
+To get all the items shared with a user, we'll need a table to store all shared items for the target user. The item name needs to be a part of this table as well so it can be displayed.
+
+User Story 4: As a user, I want to see all the items I have shared with other users.
+
+
+
