@@ -557,11 +557,26 @@ Let us now create a data model for an application that allows users to create gr
 
 Since table design is dictated by query access patterns, we need to analyze the usage with user stories. For brevity, we'll just consider a few scenarios. 
 
-User Story: As a user, I want to add items to a grocery list.
+User Story 1: As a user, I want to add items to a grocery list.
 
-User Story: As a user, I want to see all of the items in my grocery list by insertion time (i.e., newest elements first).
+User Story 2: As a user, I want to see all of the items in my grocery list by insertion time (i.e., newest elements first).
 
 A query pattern emerges after examining these user stories. It's obvious that we need a table to store and retrieve grocery list items by user id. This ensures that all item data for a particular user id are stored on the same partition. Also, user wants to see the items sorted by time which means we'll need a `created_at` column that will also serve as a clustering key.
 
-
-
+Let's create a keyspace and the initial table:
+```sql
+CREATE KEYSPACE grocery_list 
+  WITH REPLICATION = { 
+   'class' : 'NetworkTopologyStrategy',
+   'datacenter1' : 3 
+};
+```
+```sql
+CREATE TABLE grocery_list.items_by_user_id (
+    user_id int,
+    name text,
+    created_at timestamp,
+    PRIMARY KEY ((user_id), created_at)
+) WITH CLUSTERING ORDER BY (created_at DESC)
+AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
+```
