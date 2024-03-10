@@ -560,7 +560,7 @@ Since table design is dictated by query access patterns, we need to analyze the 
 User Story 1: As a user, I want to create a grocery list item.
 User Story 2: As a user, I want to see all of the items in my grocery list by insertion time (i.e., newest elements first).
 
-A query pattern emerges after examining these user stories. It's obvious that we need a table to store and retrieve grocery list items by user id. This ensures that all items for a particular user id are stored on the same partition. Also, user wants to see the items sorted by time which means we'll need a `created_at` column that will also serve as a clustering key.
+A query pattern emerges after examining these user stories. It's obvious that we need a table to store and retrieve grocery list items by user name. This ensures that all items for a particular user name are stored on the same partition. Also, user wants to see the items sorted by time which means we'll need a `created_at` column that will also serve as a clustering key.
 
 Let's create a keyspace and the initial table:
 ```sql
@@ -571,11 +571,11 @@ CREATE KEYSPACE grocery_list
 };
 ```
 ```sql
-CREATE TABLE grocery_list.items_by_user_id (
-    user_id uuid,
+CREATE TABLE grocery_list.items_by_user_name (
+    user_name text,
     item_name text,
     created_at timestamp,
-    PRIMARY KEY ((user_id), created_at)
+    PRIMARY KEY ((user_name), created_at)
 ) WITH CLUSTERING ORDER BY (created_at DESC)
 AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
 ```
@@ -586,24 +586,24 @@ To get all the items shared with a user, we'll need a table to store all shared 
 
 User Story 4: As a user, I want to see all the items I have shared with other users.
 
-Based on the user stories, both tables will need the required `user_id` as partition keys to allow for efficient queries. Also, `created_at` is added as a clustering column for sorting and uniqueness:
+Based on the user stories, both tables will need the required `user_name` as partition keys to allow for efficient queries. Also, `created_at` is added as a clustering column for sorting and uniqueness:
 
 ```sql
-CREATE TABLE grocery_list.items_shared_by_target_user_id (
-    target_user_id uuid,
-    source_userid uuid,
+CREATE TABLE grocery_list.items_shared_by_target_user_name (
+    target_user_name text,
+    source_user_name text,
     created_at timestamp,
     item_name text,
-    PRIMARY KEY ((target_user_id), created_at)
+    PRIMARY KEY ((target_user_name), created_at)
 ) WITH CLUSTERING ORDER BY (created_at DESC)
 AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
 
-CREATE TABLE grocery_list.items_shared_by_source_user_id (
-    target_user_id uuid,
-    source_user_id uuid,
+CREATE TABLE grocery_list.items_shared_by_source_user_name (
+    target_user_name text,
+    source_user_name text,
     created_at timestamp,
     item_name text,
-    PRIMARY KEY ((source_user_id), created_at)
+    PRIMARY KEY ((source_user_name), created_at)
 ) WITH CLUSTERING ORDER BY (created_at DESC)
 AND compaction = { 'class' :  'LeveledCompactionStrategy'  };
 ```
@@ -614,8 +614,23 @@ The process of data modeling in Cassandra is quite different than the typical pr
 Due to the need for data duplication, keeping data consistent across multiple tables is essential. In Cassandra, you can do that by using BATCH statements that give you an all-at-once guarantee, also called atomicity.
 
 Batch statements are cheap on a single partition, but dangerous when used on different partitions. There are a few reasons for this:
+
 * Performance Impact: Batch statements can lead to performance issues, especially for large batches or when executed frequently. Since batch statements are processed as a single operation, they can cause increased memory consumption and longer execution times, resulting in degraded performance for both read and write operations.
 * Scalability Concerns: Large batches can overwhelm Cassandra nodes and impact cluster scalability. When processing a batch, Cassandra must lock multiple rows or partitions, which can lead to contention and performance bottlenecks, particularly in distributed environments with a high volume of concurrent requests.
 * Consistency Risks: Batch statements in Cassandra do not provide strong consistency guarantees by default. While Cassandra supports eventual consistency, executing a batch can lead to inconsistent or unpredictable outcomes, especially in scenarios involving multiple partitions or distributed transactions.
-* Atomicity Challenges: Cassandra batch statements do not offer full ACID (Atomicity, Consistency, Isolation, Durability) transactional semantics. While batch operations are executed atomically within a single partition, they do not provide transactional guarantees across multiple partitions or nodes
+* Atomicity Challenges: Cassandra batch statements do not offer full ACID (Atomicity, Consistency, Isolation, Durability) transactional semantics. While batch operations are executed atomically within a single partition, they do not provide transactional guarantees across multiple partitions or nodes.
+
+There are other ways to apply changes without using BATCH statements. If the query is execute very often, consider using async queries with a proper retry mechanism.
+
+As an exercise, we will create a BATCH statement that contains a grocery list item that is shared with a user:
+```sql
+BEGIN BATCH
+  INSERT INTO grocery_list.items_by_user_name (user_name, created_at, item_name) VALUES('alice.smith', toTimestamp(now()), 'Eggs (1 dozen)');
+
+  INSERT INTO grocery_list.items_shared_by_target_user_name (target_user_name, source_user_name, created_at, item_name) VALUES('ronnie56', 'alice.smith',toTimestamp(now()), 'Eggs (1 dozen)')
+
+  INSERT INTO grocery_list.items_shared_by_source_user_name (target_user_name, source_user_name, created_at, item_name) VALUES('alice.smith', 'ronnie56', toTimestamp(now()), 'Eggs (1 dozen)')
+
+APPLY BATCH;
+```
 
