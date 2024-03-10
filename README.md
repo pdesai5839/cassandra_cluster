@@ -1,4 +1,4 @@
-# Cassandra Concepts: An In Depth Study
+# Cassandra Concepts: An In Depth Guide
 
 This project will demo several key concepts in Cassandra NoSQL database such as replication and tunble consistency level.
 
