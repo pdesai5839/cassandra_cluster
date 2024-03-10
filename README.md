@@ -634,3 +634,13 @@ BEGIN BATCH
 APPLY BATCH;
 ```
 
+Check one of the tables to ensure the data is saved:
+```sql
+SELECT * FROM grocery_list.items_shared_by_target_user_name;
+```
+```shell
+ target_user_name | created_at                      | item_name      | source_user_name
+------------------+---------------------------------+----------------+------------------
+         ronnie56 | 2024-03-10 05:45:02.041000+0000 | Eggs (1 dozen) |      alice.smith
+```
+
