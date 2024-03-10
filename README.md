@@ -1,4 +1,4 @@
-# Cassandra Cluster Playground
+# Cassandra Concepts In Detail
 
 This project will demo several key concepts in Cassandra NoSQL database such as replication and tunble consistency level.
 
